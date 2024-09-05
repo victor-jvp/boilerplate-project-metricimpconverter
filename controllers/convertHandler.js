@@ -10,21 +10,35 @@ function ConvertHandler() {
   };
 
   this.getNum = function (input) {
-    let unit = input.match(/[a-zA-Z]+/g)
-    if (unit.length == 1) unit = unit[0]
-    else unit = unit.join();
-    let result = input.replace(unit, "")
-    if(result == "") return 1;
-    if (result.indexOf('/') !== -1) {
-      num = result.split('/')
-      result = num[0] / num[1]
+    let result = 1;
+
+    if (typeof input == 'string') {
+      let unit = input.match(/[a-zA-Z]+/g)
+      if (unit) {
+        if (unit.length == 1) {
+          unit = unit[0]
+        }
+        else {
+          unit = unit.join();
+        }
+      }
+      result = input.replace(unit, "")
+      if (result.indexOf('/') !== -1) {
+        num = result.split('/')
+        if (num.length !== 2) return false;
+        result = num[0] / num[1]
+      }
+      if (!isFinite(result)) return false;
+    } else {
+      result = input;
     }
-    if (!isFinite(result)) throw new Error('invalid number');
-    return result;
+
+    return parseFloat(result);
   };
 
   this.getUnit = function (input) {
     let unit = input.match(/[a-zA-Z]+/g)
+    if (!unit) return false;
     if (unit.length == 1) unit = unit[0]
     else unit = unit.join();
     return this.spellOutUnit(unit);
@@ -36,10 +50,8 @@ function ConvertHandler() {
 
   this.spellOutUnit = function (unit) {
     if (unit === "L" || unit === "l") return "L";
-    if (units.hasOwnProperty(unit.toLowerCase())) {
-      return unit.toLowerCase();
-    }
-    throw new Error('invalid unit');
+    if (!units.hasOwnProperty(unit.toLowerCase())) return false;
+    return unit.toLowerCase();
   };
 
   this.convert = function (initNum, initUnit) {
